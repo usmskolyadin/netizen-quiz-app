@@ -6,15 +6,13 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram import Update
 
 from bot.handlers.start import start, echo
-
+from core.config import settings
 
 load_dotenv()
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_API_KEY")
-
 messages_db = []
 
-bot_app = Application.builder().token(TELEGRAM_TOKEN).build()
+bot_app = Application.builder().token(settings.telegram_api_key).build()
 bot_app.add_handler(CommandHandler("start", start))
 bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
