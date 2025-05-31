@@ -17,7 +17,6 @@ app.include_router(router)
 from webhooks.telegram import router as webhook_router
 app.include_router(webhook_router)
 
-# Настройка CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
