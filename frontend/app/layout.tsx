@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import {  } from "next/font/google";
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Netizen TMA",
+  description: "HELLO EPTA",
+};
 
 export default function RootLayout({
   children,
