@@ -22,4 +22,4 @@ dist-ssr
 *.sw?
 
 __pycache__/
-env
+*/.env
