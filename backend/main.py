@@ -7,6 +7,7 @@ from routers.router import router
 app = FastAPI(
     title="Netizen Quize API",
     description="(скажешь потом че сюда писать, но здесь лучше сделать инструкцию для твоих будущих админят)"
+    root_path="/api"
 )
 
 app.include_router(router)
