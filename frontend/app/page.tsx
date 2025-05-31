@@ -9,7 +9,7 @@ export default function Home() {
               src="/telek.png" 
               alt="Decorative overlay"
               fill
-              className="object-contain opacity-35"
+              className="object-contain opacity-35 w-full"
               style={{ mixBlendMode: 'lighten' }} 
             />
           </div>
