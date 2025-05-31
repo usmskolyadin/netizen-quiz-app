@@ -3,7 +3,7 @@ from typing import List
 from db.connection import postgres as cn
 from db.connection.postgres import *
 
-router = APIRouter(prefix="/api/v1", tags=["Quiz & Users"])
+router = APIRouter(prefix="/tma", tags=["Quiz & Users"])
 
 @router.get("/users/{tg_id}", response_model=UserRead)
 async def get_user(tg_id: int):

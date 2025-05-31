@@ -9,8 +9,7 @@ app = FastAPI(
     description="(скажешь потом че сюда писать, но здесь лучше сделать инструкцию для твоих будущих админят)",
     version="0.0.1",
     root_path="/api/v1",
-    root_path_in_servers=False,
-    docs_url="/"
+    docs_url="/docs"
 )
 
 app.include_router(router)
