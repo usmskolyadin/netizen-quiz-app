@@ -17,7 +17,8 @@ bot_app.add_handler(CommandHandler("start", start))
 bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
 
-router = APIRouter()
+router = APIRouter(tags=["Telegram"])
+
 @router.post("/api/send_message")
 async def send_message(request: Request):
     data = await request.json()
