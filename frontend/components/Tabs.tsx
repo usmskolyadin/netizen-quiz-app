@@ -1,7 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QuizeItem } from './QuizeItem'
+import axios from 'axios'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Tabs() {
   const [activeTab, setActiveTab] = useState(1)
@@ -11,12 +14,17 @@ export default function Tabs() {
     { id: 2, title: 'Мода' },
     { id: 3, title: 'Искусство' }
   ]
+  
+  const [quizes, setQuizes] = useState<any[]>([]);
 
-  const tabContents = [
-    { id: 1, content: 'Содержимое первой вкладки' },
-    { id: 2, content: 'Контент второй вкладки' },
-    { id: 3, content: 'Третья вкладка информация' }
-  ]
+  useEffect(() => {
+    const fetchQuizes = async () => {
+      const response = await axios.get('/api/quizes');
+      setQuizes(response.data);
+    };
+
+    fetchQuizes();
+  }, []);
 
   return (
     <div className="">
@@ -36,18 +44,24 @@ export default function Tabs() {
         ))}
       </div>
 
-      <div className="">
-        {tabContents.map(content => (
-          <div 
-            key={content.id}
-            className={`${activeTab === content.id ? 'block' : 'hidden'} grid grid-cols-2 gap-5 mt-3`}
-          >
-            <QuizeItem />
-            <QuizeItem />
-            <QuizeItem />
-            <QuizeItem />
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-4 my-4">
+        {quizes.map((quiz) => {
+          return (
+            <Link href={`/quizes/${quiz.id}`}>
+              <div key={quiz.id} className="relative border-2 border-white w-full">
+                <div className="w-full h-6 bg-[#010089]">
+                  <p className="uppercase px-2 text-xs py-1">{quiz.categories?.[0]?.name || "Категория"}</p>
+                </div>
+                <Image className="h-40 object-cover" src={quiz.image_url || "/placeholder.png"} alt={quiz.title} width={1000} height={100} />
+                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),transparent)]" />
+                <div className="absolute bottom-2 left-2 ">
+                  {quiz.is_new && <h3 className="uppercase text-xs text-[#F97316]">Новинка</h3>}
+                  <h3 className="uppercase text-md mt-1 break-words w-40">{quiz.title}</h3>
+                </div>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

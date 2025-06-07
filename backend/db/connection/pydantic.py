@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
+# Базовые схемы
 class UserBase(BaseModel):
     username: str = Field(..., max_length=50)
     tg_id: int
@@ -17,6 +18,9 @@ class QuizBase(BaseModel):
     collaborator_logo: Optional[str] = Field(None, max_length=255)
     collaborator_link: Optional[str] = Field(None, max_length=255)
 
+class QuizCategoryBase(BaseModel):
+    name: str = Field(..., max_length=50)
+
 class QuestionBase(BaseModel):
     text: str
     question_type: str = Field(..., max_length=20)
@@ -31,9 +35,6 @@ class AnswerBase(BaseModel):
     text: str
     is_correct: bool
 
-class QuizCategoryBase(BaseModel):
-    name: str = Field(..., max_length=50)
-
 class ScoreRatingBase(BaseModel):
     min_score: int
     max_score: int
@@ -41,11 +42,15 @@ class ScoreRatingBase(BaseModel):
     text: str
     image_url: Optional[str] = Field(None, max_length=255)
 
+# Create-схемы
 class UserCreate(UserBase):
     pass
 
+class QuizCategoryCreate(QuizCategoryBase):
+    quiz_id: int
+
 class QuizCreate(QuizBase):
-    pass
+    pass  # Categories and score ratings should be added separately
 
 class QuestionCreate(QuestionBase):
     quiz_id: int
@@ -53,12 +58,10 @@ class QuestionCreate(QuestionBase):
 class AnswerCreate(AnswerBase):
     question_id: int
 
-class QuizCategoryCreate(QuizCategoryBase):
-    quiz_id: int
-
 class ScoreRatingCreate(ScoreRatingBase):
     quiz_id: int
 
+# Read-схемы
 class UserRead(UserBase):
     id: int
     class Config:
@@ -83,16 +86,18 @@ class QuestionRead(QuestionBase):
     class Config:
         from_attributes = True
 
+class ScoreRatingRead(ScoreRatingBase):
+    id: int
+    quiz_id: int
+    class Config:
+        from_attributes = True
+
 class QuizRead(QuizBase):
     id: int
     categories: List[QuizCategoryRead] = []
     questions: List[QuestionRead] = []
-    class Config:
-        from_attributes = True
-
-class ScoreRatingRead(ScoreRatingBase):
-    id: int
-    quiz_id: int
+    score_ratings: List[ScoreRatingRead] = []
+    
     class Config:
         from_attributes = True
 
@@ -107,9 +112,13 @@ class QuizResultRead(BaseModel):
     class Config:
         from_attributes = True
 
+# Update-схемы
 class UserUpdate(BaseModel):
     username: Optional[str] = Field(None, max_length=50)
     tg_id: Optional[int] = None
+
+class QuizCategoryUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=50)
 
 class QuizUpdate(BaseModel):
     title: Optional[str] = Field(None, max_length=100)
@@ -135,9 +144,6 @@ class QuestionUpdate(BaseModel):
 class AnswerUpdate(BaseModel):
     text: Optional[str] = None
     is_correct: Optional[bool] = None
-
-class QuizCategoryUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=50)
 
 class ScoreRatingUpdate(BaseModel):
     min_score: Optional[int] = None
