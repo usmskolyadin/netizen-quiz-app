@@ -14,7 +14,7 @@ export const GET = async (
       );
     }
 
-    const backendUrl = `http://localhost:8000/tma/quizes/${id}/`;
+    const backendUrl = `https://netizenworld.ru/tma/tma/quizes/${id}/`;
     const res = await fetch(backendUrl);
     
     if (!res.ok) {
