@@ -47,7 +47,7 @@ export default function Detail() {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/tma/quizes/${id}`);
+        const response = await axios.get(`https://netizenworld.ru/tma/tma/quizes/${id}`);
         setQuiz(response.data);
       } catch (err) {
         setError('Failed to load quiz');
@@ -65,7 +65,7 @@ export default function Detail() {
   const handleStart = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/tma/quizes/${id}/questions`);
+      const response = await axios.get(`https://netizenworld.ru/tma/tma/quizes/${id}/questions`);
       setQuestions(response.data);
       setMainVisible(false);
     } catch (err) {
