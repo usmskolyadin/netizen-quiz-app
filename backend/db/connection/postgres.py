@@ -19,7 +19,8 @@ async def get_user(tg_id):
         await session.commit()
         await session.refresh(new_user)
         return new_user
-    
+
+
 async def get_all_quizes() -> List[QuizRead]:
     async with async_session() as session:
         result = await session.execute(
@@ -45,6 +46,7 @@ async def get_quiz(quiz_id: int) -> Optional[QuizRead]:
         if quiz:
             return QuizRead.model_validate(quiz)
         return None
+    
 async def create_quiz(quiz_data: QuizCreate) -> QuizRead:
     async with async_session() as session:
         quiz = Quiz(**quiz_data.model_dump())

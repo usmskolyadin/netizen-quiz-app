@@ -18,5 +18,6 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     tg_id = mapped_column(BigInteger)
-
+    total_score: Mapped[int] = mapped_column(Integer, default=0)
+    
     results: Mapped[List['QuizResult']] = relationship(back_populates='user')
