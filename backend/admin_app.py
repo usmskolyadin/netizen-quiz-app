@@ -1,4 +1,3 @@
-# admin_app.py
 from fastapi import FastAPI
 from crudadmin import CRUDAdmin
 from db.base import engine, Base
@@ -27,6 +26,7 @@ admin.add_view(
     model=User,
     create_schema=UserCreate,
     update_schema=UserUpdate,
+    read_schema=UserRead,
     allowed_actions={"view", "create", "update", "delete"}
 )
 
@@ -72,6 +72,11 @@ async def lifespan(app: FastAPI):
     print("Admin initialized successfully")
     yield
 
-admin_app = FastAPI(lifespan=lifespan)
+admin_app = FastAPI(
+    lifespan=lifespan,
+    root_path="/admin",
+    docs_url=None,     
+    redoc_url=None
+)
 
 admin_app.mount("/", admin.app, name="admin")
