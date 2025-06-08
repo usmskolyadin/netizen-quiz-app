@@ -13,8 +13,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const response = await axios.get(`http://localhost:8000/tma/users/${tg_id}`);
-
+    const response = await axios.get(`https://netizenworld.ru/tma/tma/users/${tg_id}`);
 
     return NextResponse.json(response.data);
     

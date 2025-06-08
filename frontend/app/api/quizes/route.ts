@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const GET = async () => {
   try {
-    const res = await fetch('http://localhost:8000/tma/quizes/');
+    const res = await fetch('https://netizenworld.ru/tma/tma/quizes/');
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
