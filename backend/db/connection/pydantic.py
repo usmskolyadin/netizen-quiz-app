@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
-# Базовые схемы
 class UserBase(BaseModel):
     username: str = Field(..., max_length=50)
     tg_id: int
@@ -11,13 +10,13 @@ class UserCreate(UserBase):
     is_superuser: Optional[bool] = Field(default=False)
     is_active: Optional[bool] = Field(default=False)
 
-class User(UserBase):
+class UserRead(UserBase):
     id: int
-    results: List['QuizResult'] = []  # Или добавить класы QuizResult при необходимости
+    results: List['QuizResultRead'] = [] 
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
+        
 class QuizBase(BaseModel):
     title: str = Field(..., max_length=100)
     description: str

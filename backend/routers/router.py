@@ -5,7 +5,7 @@ from db.connection.postgres import *
 
 router = APIRouter(prefix="/tma", tags=["Quiz & Users"])
 
-@router.get("/users/{tg_id}", response_model=User)
+@router.get("/users/{tg_id}", response_model=UserRead)
 async def get_user(tg_id: int):
     user = await cn.get_user(tg_id)
     if not user:

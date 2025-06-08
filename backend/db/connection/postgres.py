@@ -10,7 +10,11 @@ from sqlalchemy.orm import selectinload
 
 async def get_user(tg_id):
     async with async_session() as session:
-        user = await session.scalar(select(User).where(User.tg_id == tg_id))
+        user = await session.scalar(
+            select(User)
+            .where(User.tg_id == tg_id)
+            .options(selectinload(User.results))
+        )
         if user:
             return user
         

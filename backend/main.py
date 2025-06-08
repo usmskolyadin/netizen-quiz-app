@@ -17,6 +17,7 @@ app = FastAPI(
     title="Netizen Quize API",
     description="(скажешь потом че сюда писать, но здесь лучше сделать инструкцию для твоих будущих админят)",
     version="0.0.1",
+    root_path="/tma", 
     docs_url="/docs",
 )
 
