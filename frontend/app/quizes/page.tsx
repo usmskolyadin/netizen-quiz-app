@@ -21,7 +21,7 @@ export default function AllQuizes() {
   }, []);
 
   const handleBack = () => {
-    router.push('/'); // замените '/' на нужный маршрут, если нужно
+    router.push('/');
   };
 
   return (

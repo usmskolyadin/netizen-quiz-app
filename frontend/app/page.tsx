@@ -9,22 +9,33 @@ import Slider from "@/components/Slider";
 
 
 export default function Home() {
-  const [userId, setUserId] = useState<number | null>(null);
-
-  // useEffect(() => {
-  //   const initUser = async () => {
-  //     const tg = (window as any).Telegram.WebApp;
-  //     const user = tg?.initDataUnsafe?.user;
-
-  //     if (user?.id) {
-  //       const response = await axios.get(`/api/register?tg_id=${user.id}`);
-  //       setUserId(response.data.id);
-  //     }
-  //   };
-
-  //   initUser();
-  // }, []);
+  const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
   
+  useEffect(() => {
+    const initUser = async () => {
+      const tg = (window as any).Telegram.WebApp;
+      const user = tg?.initDataUnsafe?.user;
+
+      if (user?.id) {
+        try {
+          const response = await axios.get(`/api/register?tg_id=${user.id}`);
+          setUser({
+            id: response.data.id,
+            total_score: response.data.total_score || 0
+          });
+        } catch (error) {
+          console.error("Error fetching user:", error);
+          setUser({
+            id: user.id,
+            total_score: 0
+          });
+        }
+      }
+    };
+
+    initUser();
+  }, []);
+
   const [quizes, setQuizes] = useState<any[]>([]);
 
   useEffect(() => {
@@ -51,7 +62,7 @@ export default function Home() {
         <header className="flex py-5 items-center text-white justify-between mx-4">
           <h1 className="text-2xl uppercase">NETQUIZE</h1>
           <div className="flex">
-            <p className="mr-2">999</p>
+            <p className="mr-2">{user?.total_score || 0}</p>
             <Coin />
           </div>
         </header>

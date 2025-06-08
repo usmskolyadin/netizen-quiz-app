@@ -7,6 +7,17 @@ class UserBase(BaseModel):
     username: str = Field(..., max_length=50)
     tg_id: int
 
+class UserCreate(UserBase):
+    is_superuser: Optional[bool] = Field(default=False)
+    is_active: Optional[bool] = Field(default=False)
+
+class User(UserBase):
+    id: int
+    results: List['QuizResult'] = []  # Или добавить класы QuizResult при необходимости
+
+    class Config:
+        orm_mode = True
+
 class QuizBase(BaseModel):
     title: str = Field(..., max_length=100)
     description: str

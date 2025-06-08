@@ -180,11 +180,11 @@ export default function Detail() {
             
             <div className="relative border-2 border-white w-full bg-white px-2 py-4">
               
-              <div className="flex items-center">
-                <div className="w-full h-6 flex items-center text-black">
+              <div className="flex items-center border-b border-black">
+                <div className="w-full h-6 flex items-center text-black mb-2">
                   <p className="uppercase px-2 text-xl py-1">{currentQuestionIndex + 1}/{questions.length}</p>
                 </div>
-                <div className="w-full h-8 flex items-center">
+                <div className="w-full h-8 flex items-center mb-2">
                   {Array.from({ length: currentQuestionIndex + 1 }).map((_, index) => (
                     <span key={index} className="bg-[#010089] h-6 w-4 border-b border-[#4D77FF] border-2 border-r"></span>
                   ))}

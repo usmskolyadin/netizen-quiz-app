@@ -5,7 +5,7 @@ from db.connection.postgres import *
 
 router = APIRouter(prefix="/tma", tags=["Quiz & Users"])
 
-@router.get("/users/{tg_id}", response_model=UserRead)
+@router.get("/users/{tg_id}", response_model=User)
 async def get_user(tg_id: int):
     user = await cn.get_user(tg_id)
     if not user:
@@ -13,6 +13,7 @@ async def get_user(tg_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )   
+    
     return user
 
 @router.get("/quizes/", response_model=List[QuizRead])
@@ -103,4 +104,10 @@ async def create_answer(question_id: int, answer_data: AnswerCreate):
 @router.post("/quizes/{quiz_id}/results", response_model=QuizResultRead, status_code=status.HTTP_201_CREATED)
 async def create_result(quiz_id: int, user_id: int, result_data: dict):
     result = await cn.create_quiz_result(quiz_id, user_id, result_data)
+    
+    user = await cn.get_user(user_id)
+    if user:
+        total_score = sum(r.score for r in user.results)
+        await cn.update_user(user_id, {"total_score": total_score})
+    
     return QuizResultRead.model_validate(result)
