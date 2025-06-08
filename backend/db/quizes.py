@@ -2,9 +2,7 @@ from sqlalchemy import ForeignKey, String, Text, Boolean, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List
 from datetime import datetime
-
 from db.base import Base
-
 
 class Quiz(Base):
     __tablename__ = 'quizzes'
@@ -20,9 +18,10 @@ class Quiz(Base):
     collaborator_logo: Mapped[Optional[str]] = mapped_column(String(255))
     collaborator_link: Mapped[Optional[str]] = mapped_column(String(255))
     
-    categories: Mapped[List['QuizCategory']] = relationship(back_populates='quiz')
-    questions: Mapped[List['Question']] = relationship(back_populates='quiz')
-    results: Mapped[List['QuizResult']] = relationship(back_populates='quiz')
+    questions: Mapped[List['Question']] = relationship(back_populates='quiz', lazy="selectin")
+    categories: Mapped[List['QuizCategory']] = relationship(back_populates='quiz', lazy="selectin")
+    score_ratings: Mapped[List['ScoreRating']] = relationship(back_populates='quiz', lazy="selectin")
+    results: Mapped[List['QuizResult']] = relationship(back_populates='quiz', lazy="selectin")
 
 class QuizCategory(Base):
     __tablename__ = 'quiz_categories'
@@ -85,4 +84,5 @@ class ScoreRating(Base):
     text: Mapped[str] = mapped_column(Text())
     image_url: Mapped[Optional[str]] = mapped_column(String(255))
     
-    quiz: Mapped['Quiz'] = relationship()
+    quiz: Mapped['Quiz'] = relationship(back_populates='score_ratings')
+
