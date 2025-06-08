@@ -15,5 +15,15 @@ services:
     networks:
       - tmaquize-prod
 
+  admin:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.admin
+    ports:
+      - "8001:8001"
+    networks:
+      - tmaquize-prod
+
+
 networks:
   tmaquize-prod:
