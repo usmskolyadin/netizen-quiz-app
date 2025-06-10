@@ -43,7 +43,7 @@ class QuestionBase(BaseModel):
 
 class AnswerBase(BaseModel):
     text: str
-    is_correct: bool
+    is_correct: bool = False
 
 class ScoreRatingBase(BaseModel):
     min_score: int
