@@ -21,12 +21,18 @@ admin = CRUDAdmin(
     },
 )
 
+admin.add_view(
+    model=QuizCategory,
+    create_schema=QuizCategoryCreate,
+    update_schema=QuizCategoryUpdate,
+    allowed_actions={"view", "create", "update", "delete"}
+)
+
 
 admin.add_view(
     model=User,
     create_schema=UserCreate,
     update_schema=UserUpdate,
-    read_schema=UserRead,
     allowed_actions={"view", "create", "update", "delete"}
 )
 
