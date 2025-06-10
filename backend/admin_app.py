@@ -28,7 +28,6 @@ admin.add_view(
     allowed_actions={"view", "create", "update", "delete"}
 )
 
-
 admin.add_view(
     model=User,
     create_schema=UserCreate,
