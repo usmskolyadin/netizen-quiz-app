@@ -34,7 +34,6 @@ export default function QuizSlider({ quizes }: { quizes: Quiz[] }) {
     setCurrentIndex(prev => (prev - 1 + totalSlides) % totalSlides)
   }, [totalSlides])
 
-  // Обработка свайпа
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsSwiping(true)
     setStartX(e.touches[0].clientX)
@@ -58,18 +57,15 @@ export default function QuizSlider({ quizes }: { quizes: Quiz[] }) {
     } else if (translateX < -50) {
       goToNext()
     } else {
-      // Возвращаем на место если свайп был слишком маленький
       setTranslateX(0)
     }
   }
 
-  // Рассчитываем позиции для видимых слайдов
   const getSlidePosition = (index: number) => {
     const position = (index - currentIndex + totalExtendedSlides) % totalExtendedSlides
     return position
   }
 
-  // Анимация перехода
   useEffect(() => {
     if (!isSwiping) {
       setTranslateX(0)
@@ -111,7 +107,15 @@ export default function QuizSlider({ quizes }: { quizes: Quiz[] }) {
                     pointerEvents: isActive ? 'auto' : 'none'
                 }}
                 >
-                <div className="relative w-full h-86 border-r border-b border-5 border-white overflow-hidden mx-auto max-w-md">
+                <div 
+                  className="relative w-full h-86 overflow-hidden mx-auto max-w-md"
+                  style={{
+                    borderTop: '6px solid white',
+                    borderLeft: '6px solid white',
+                    borderRight: '6px solid #293133', // Коричневый цвет
+                    borderBottom: '6px solid #293133' // Коричневый цвет
+                  }}
+                >
                     <div className="w-full h-6 px-2 bg-[#010089] flex justify-between items-center">
                     <p className="uppercase text-md">Музыка</p>
                     <svg width="45" height="14" viewBox="0 0 45 14" fill="none" xmlns="http://www.w3.org/2000/svg">
