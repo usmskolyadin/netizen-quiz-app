@@ -10,6 +10,34 @@ import axios from "axios";
 export default function AllQuizes() {
   const router = useRouter();
   const [quizes, setQuizes] = useState<any[]>([]);
+  const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const initUser = async () => {
+      const tg = (window as any).Telegram.WebApp;
+      const user = tg?.initDataUnsafe?.user;
+
+      if (user?.id) {
+        try {
+          const response = await axios.get(`/api/register?tg_id=${user.id}`);
+          setUser({
+            id: response.data.id,
+            total_score: response.data.total_score || 0
+          });
+        } catch (error) {
+          console.error("Error fetching user:", error);
+          setUser({
+            id: user.id,
+            total_score: 0
+          });
+        }
+      }
+    };
+
+    initUser();
+  }, []);
 
   useEffect(() => {
     const fetchQuizes = async () => {
@@ -44,7 +72,7 @@ export default function AllQuizes() {
           <p onClick={handleBack} className="uppercase text-md ml-2 cursor-pointer">назад</p>
         </div>
         <div className="flex">
-          <p className="mr-2">999</p>
+          <p className="mr-2">{user?.total_score || 0}</p>
           <Coin />
         </div>
       </header>

@@ -43,6 +43,32 @@ export default function Detail() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [isMainVisible, setMainVisible] = useState(true);
+  const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
+  
+  useEffect(() => {
+    const initUser = async () => {
+      const tg = (window as any).Telegram.WebApp;
+      const user = tg?.initDataUnsafe?.user;
+
+      if (user?.id) {
+        try {
+          const response = await axios.get(`/api/register?tg_id=${user.id}`);
+          setUser({
+            id: response.data.id,
+            total_score: response.data.total_score || 0
+          });
+        } catch (error) {
+          console.error("Error fetching user:", error);
+          setUser({
+            id: user.id,
+            total_score: 0
+          });
+        }
+      }
+    };
+
+    initUser();
+  }, []);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -133,7 +159,7 @@ export default function Detail() {
             <p onClick={handleBack} className="uppercase text-md ml-2">назад</p>
           </div>
           <div className="flex">
-            <p className="mr-2">999</p>
+            <p className="mr-2">{user?.total_score || 0}</p>
             <Coin />
           </div>
         </header>
