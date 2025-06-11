@@ -23,6 +23,9 @@ type QuizBasic = {
 type Question = {
   id: number;
   text: string;
+  question_type: string;
+  presentation_type: string;
+  media_url: string | null;
   answers: {
     id: number;
     text: string;
@@ -126,6 +129,41 @@ export default function Detail() {
     router.push('/');
   };
 
+  const renderMediaContent = () => {
+    if (!currentQuestion?.media_url) return null;
+
+    switch (currentQuestion.presentation_type) {
+      case 'photo':
+        return (
+          <Image 
+            className="max-h-40 object-cover mx-auto"
+            src={currentQuestion.media_url}
+            alt="Question image"
+            width={600}
+            height={400}
+          />
+        );
+      case 'video':
+        return (
+          <video 
+            className="max-h-60 w-full mx-auto"
+            controls
+            src={currentQuestion.media_url}
+          />
+        );
+      case 'audio':
+        return (
+          <audio 
+            className="w-full"
+            controls
+            src={currentQuestion.media_url}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return <div className="text-white w-full h-screen bg-black flex items-center justify-center">Loading...</div>;
   }
@@ -138,42 +176,47 @@ export default function Detail() {
     return <div className="text-white w-full h-screen bg-black flex items-center justify-center">Quiz not found</div>;
   }
 
-
   return (
-      <div className="text-white w-full h-full min-h-screen bg-black relative">
-          <div className="absolute inset-0 z-10 pointer-events-none">
-            <Image 
-              src="/telek.png" 
-              alt="Decorative overlay"
-              fill
-              priority
-              quality={100}
-              className="object-cover opacity-35"
-            />
-          </div>
-        <header className="flex py-5 items-center text-white justify-between mx-4">
-          <div className="flex justify-between items-center">
-            <svg width="12" height="21" viewBox="0 0 12 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 0.5V1.5H8V3.5H6V5.5H4V7.5H2V8.5H1V9.5H0V11.5H1V12.5H2V13.5H4V15.5H6V17.5H7H8V18.5V19.5H10V20.5H12V17.5H10V15.5H8V13.5H6V11.5H4V9.5H6V7.5H8V5.5H10V3.5H12V0.5H10Z" fill="white"/>
-            </svg>
-            <p onClick={handleBack} className="uppercase text-md ml-2">назад</p>
-          </div>
-          <div className="flex">
-            <p className="mr-2">{user?.total_score || 0}</p>
-            <Coin />
-          </div>
-        </header>
+    <div className="text-white w-full h-full min-h-screen bg-black relative">
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        <Image 
+          src="/telek.png" 
+          alt="Decorative overlay"
+          fill
+          priority
+          quality={100}
+          className="object-cover opacity-35"
+        />
+      </div>
+      
+      <header className="flex py-5 items-center text-white justify-between mx-4">
+        <div className="flex justify-between items-center">
+          <svg width="12" height="21" viewBox="0 0 12 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0.5V1.5H8V3.5H6V5.5H4V7.5H2V8.5H1V9.5H0V11.5H1V12.5H2V13.5H4V15.5H6V17.5H7H8V18.5V19.5H10V20.5H12V17.5H10V15.5H8V13.5H6V11.5H4V9.5H6V7.5H8V5.5H10V3.5H12V0.5H10Z" fill="white"/>
+          </svg>
+          <p onClick={handleBack} className="uppercase text-md ml-2">назад</p>
+        </div>
+        <div className="flex">
+          <p className="mr-2">{user?.total_score || 0}</p>
+          <Coin />
+        </div>
+      </header>
 
-        <main className={`flex flex-col mx-4 ${isMainVisible ? "" : "hidden"}`}>
-          <section className="">
-            
-            <div className="relative border-2 border-white w-full bg-white">
-              <div className="w-full h-6 bg-[#010089]">
-                <p className="uppercase px-2 text-xs py-1">Музыка</p>
-              </div>
-              <Image className="max-h-40 object-cover" src={`${quiz.image_url}`} alt={""} width={1000} height={100}/>
-              <div className="absolute max-h-46 inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),transparent)]" />
-              <div className="px-2 py-2">
+      <main className={`flex flex-col mx-4 ${isMainVisible ? "" : "hidden"}`}>
+        <section>
+          <div className="relative border-2 border-white w-full bg-white">
+            <div className="w-full h-6 bg-[#010089]">
+              <p className="uppercase px-2 text-xs py-1">Музыка</p>
+            </div>
+            <Image 
+              className="max-h-40 object-cover" 
+              src={quiz.image_url} 
+              alt="Quiz cover" 
+              width={1000} 
+              height={400}
+            />
+            <div className="absolute max-h-46 inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),transparent)]" />
+            <div className="px-2 py-2">
               <div className="items-center flex justify-between">
                 <h3 className="uppercase text-xl mt-1 text-black break-words w-64">{quiz.title}</h3>
                 <div className="bg-[#CECECE] max-h-10">
@@ -186,67 +229,88 @@ export default function Detail() {
               <div className="py-2">
                 <h2 className="text-black text-xs mb-1">Соавтор</h2>
                 <div className="flex items-center">
-                  <Image className="w-8 h-8 rounded-full object-cover" src={`${quiz.collaborator_logo}`} alt={""} width={100} height={100} />
+                  <Image 
+                    className="w-8 h-8 rounded-full object-cover" 
+                    src={quiz.collaborator_logo || "/placeholder.png"} 
+                    alt="Collaborator logo" 
+                    width={32} 
+                    height={32} 
+                  />
                   <h2 className="uppercase text-black text-xs ml-2">{quiz.collaborator_name}</h2>
                 </div>
               </div>
               <p className="text-black text-xs">{quiz.description}</p>
               
-              <button className="bg-[#0100BE] px-4 py-2 w-full mt-2" onClick={handleStart}>Пройти</button>
+              <button 
+                className="bg-[#0100BE] px-4 py-2 w-full mt-2 text-white"
+                onClick={handleStart}
+              >
+                Пройти
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <main className={`flex flex-col mx-4 ${isMainVisible ? "hidden" : ""}`}>
+        <section>
+          <div className="relative border-2 border-white w-full bg-white px-2 py-4">
+            <div className="flex items-center border-b border-black">
+              <div className="w-full h-6 flex items-center text-black mb-2">
+                <p className="uppercase px-2 text-xl py-1">
+                  {currentQuestionIndex + 1}/{questions.length}
+                </p>
+              </div>
+              <div className="w-full h-8 flex items-center mb-2">
+                {Array.from({ length: currentQuestionIndex + 1 }).map((_, index) => (
+                  <span 
+                    key={index} 
+                    className="bg-[#010089] h-6 w-4 border-b border-[#4D77FF] border-2 border-r"
+                  />
+                ))}
               </div>
             </div>
-
-          </section>
-        </main>
-
-
-
-        <main className={`flex flex-col mx-4 ${isMainVisible ? "hidden" : ""}`}>
-          <section className="">
             
-            <div className="relative border-2 border-white w-full bg-white px-2 py-4">
+            <div className="px-2 py-2">
+              <h3 className="uppercase text-xl mt-1 text-black break-words mb-2 text-center">
+                {currentQuestion?.text}
+              </h3>
               
-              <div className="flex items-center border-b border-black">
-                <div className="w-full h-6 flex items-center text-black mb-2">
-                  <p className="uppercase px-2 text-xl py-1">{currentQuestionIndex + 1}/{questions.length}</p>
-                </div>
-                <div className="w-full h-8 flex items-center mb-2">
-                  {Array.from({ length: currentQuestionIndex + 1 }).map((_, index) => (
-                    <span key={index} className="bg-[#010089] h-6 w-4 border-b border-[#4D77FF] border-2 border-r"></span>
-                  ))}
-                </div>
-              </div>
+              {renderMediaContent()}
               
-              <div className="px-2 py-2 ">
-                <h3 className="uppercase text-xl mt-1 text-black break-words w-64 mb-2 flex justify-center mx-auto items-center">{currentQuestion?.text}</h3>
-                <Image className="max-h-40 object-cover" src={`${quiz.image_url}`} alt={""} width={1000} height={100}/>
-                
-                <div className="mt-4 ">
-                  {currentQuestion?.answers.map(answer => (
-                    <button 
-                      key={answer.id}
-                      onClick={() => !selectedAnswer && handleAnswerSelect(answer.id, answer.is_correct)}
-                      className={`bg-[#C0C0C0] w-full h-12 text-black border-t border-l border-3 ${selectedAnswer === answer.id ? answer.is_correct ? 'border-blue' : 'border-red' : 'bg-black' }`}>
-                      {answer.text}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedAnswer && (
-                  <button
-                    onClick={goToNextQuestion}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium"
+              <div className="mt-4 space-y-2">
+                {currentQuestion?.answers.map(answer => (
+                  <button 
+                    key={answer.id}
+                    onClick={() => !selectedAnswer && handleAnswerSelect(answer.id, answer.is_correct)}
+                    className={`
+                      w-full py-3 px-4 text-left
+                      ${selectedAnswer === answer.id 
+                        ? answer.is_correct 
+                          ? 'bg-green-100 border-2 border-green-500' 
+                          : 'bg-red-100 border-2 border-red-500'
+                        : 'bg-gray-200 hover:bg-gray-300'
+                      }
+                      text-black rounded-lg transition-colors
+                    `}
                   >
-                    {currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить квиз'}
+                    {answer.text}
                   </button>
-                )}
-
+                ))}
               </div>
+
+              {selectedAnswer && (
+                <button
+                  onClick={goToNextQuestion}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white mt-4"
+                >
+                  {currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить квиз'}
+                </button>
+              )}
             </div>
-
-          </section>
-        </main>
-
-      </div>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
