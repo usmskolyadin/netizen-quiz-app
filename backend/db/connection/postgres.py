@@ -86,10 +86,27 @@ async def delete_quiz(quiz_id: int) -> bool:
 async def get_quiz_questions(quiz_id: int) -> List[QuestionRead]:
     async with async_session() as session:
         result = await session.execute(
-            select(Question).where(Question.quiz_id == quiz_id)
+            select(Question)
+            .where(Question.quiz_id == quiz_id)
+            .options(selectinload(Question.answers))
         )
         questions = result.scalars().all()
-        return [QuestionRead.model_validate(q) for q in questions]
+        
+        questions_data = []
+        for q in questions:
+            question_dict = {
+                **q.__dict__,
+                "answers": [{
+                    "id": a.id,
+                    "text": a.text,
+                    "is_correct": a.is_correct,
+                    "question_id": a.question_id
+                } for a in q.answers]
+            }
+            questions_data.append(question_dict)
+        
+        return [QuestionRead.model_validate(q) for q in questions_data]
+    
 
 async def create_question(quiz_id: int, question_data: QuestionCreate) -> QuestionRead:
     async with async_session() as session:

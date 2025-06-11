@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Any, Optional, List
 from datetime import datetime
+
+from db.quizes import Question
 
 class UserBase(BaseModel):
     username: str = Field(..., max_length=50)
@@ -93,9 +95,36 @@ class QuestionRead(QuestionBase):
     id: int
     quiz_id: int
     answers: List[AnswerRead] = []
+    
     class Config:
         from_attributes = True
-
+        
+        @classmethod
+        def model_validate(cls, obj: Any, **kwargs):
+            if isinstance(obj, Question):
+                # Преобразуем SQLAlchemy объект в словарь
+                data = {
+                    "id": obj.id,
+                    "quiz_id": obj.quiz_id,
+                    "text": obj.text,
+                    "question_type": obj.question_type,
+                    "presentation_type": obj.presentation_type,
+                    "media_url": obj.media_url,
+                    "order_number": obj.order_number,
+                    "correct_answers_count": obj.correct_answers_count,
+                    "points": obj.points,
+                    "explanation": obj.explanation,
+                    "answers": [{
+                        "id": a.id,
+                        "text": a.text,
+                        "is_correct": a.is_correct,
+                        "question_id": a.question_id
+                    } for a in obj.answers]
+                }
+                return super().model_validate(data, **kwargs)
+            return super().model_validate(obj, **kwargs)
+        
+        
 class ScoreRatingRead(ScoreRatingBase):
     id: int
     quiz_id: int
