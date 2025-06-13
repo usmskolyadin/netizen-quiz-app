@@ -5,7 +5,7 @@ from datetime import datetime
 from db.quizes import Question
 
 class UserBase(BaseModel):
-    username: str = Field(..., max_length=50)
+    username: Optional[str] = Field(None, max_length=50)
     tg_id: int
 
 class UserCreate(UserBase):

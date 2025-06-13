@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
+import { CustomVideoPlayer } from "@/components/CustomVideoPlayer";
+import CustomAudioPlayer from "@/components/CustomAudioPlayer";
 
 type QuizBasic = {
   id: number;
@@ -26,6 +28,8 @@ type Question = {
   question_type: string;
   presentation_type: string;
   media_url: string | null;
+  explanation: string;
+  points: number;
   answers: {
     id: number;
     text: string;
@@ -47,6 +51,15 @@ export default function Detail() {
   const [score, setScore] = useState(0);
   const [isMainVisible, setMainVisible] = useState(true);
   const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
+  const [isFinished, setIsFinished] = useState(false);
+  const [answerSubmitted, setAnswerSubmitted] = useState(false);
+
+  const handleSubmitAnswer = () => {
+    setAnswerSubmitted(true);
+    if (isCorrect) {
+      setScore(prev => prev + currentQuestion.points);
+    }
+  };
   
   useEffect(() => {
     const initUser = async () => {
@@ -74,6 +87,25 @@ export default function Detail() {
   }, []);
 
   useEffect(() => {
+    if (isFinished && user && quiz) {
+      const sendResult = async () => {
+        try {
+          await axios.post('https://netizenworld.ru/tma/tma/results/', {
+            quiz: quiz.id,
+            user: user.id,
+            score,
+          });
+          console.log('Результат успешно отправлен');
+        } catch (err) {
+          console.error('Ошибка при отправке результата:', err);
+        }
+      };
+
+      sendResult();
+    }
+  }, [isFinished, user, quiz, score]);
+
+  useEffect(() => {
     const fetchQuiz = async () => {
       try {
         const response = await axios.get(`https://netizenworld.ru/tma/tma/quizes/${id}`);
@@ -97,6 +129,9 @@ export default function Detail() {
       const response = await axios.get(`https://netizenworld.ru/tma/tma/quizes/${id}/questions`);
       setQuestions(response.data);
       setMainVisible(false);
+      setIsFinished(false);
+      setSelectedAnswer(null);
+      setIsCorrect(null);
     } catch (err) {
       setError('Failed to load questions');
       console.error(err);
@@ -111,7 +146,7 @@ export default function Detail() {
     setSelectedAnswer(answerId);
     setIsCorrect(isCorrect);
     if (isCorrect) {
-      setScore(prev => prev + 1);
+      setScore(prev => prev + currentQuestion.points);
     }
   };
 
@@ -120,8 +155,9 @@ export default function Detail() {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setIsCorrect(null);
+      setAnswerSubmitted(false);
     } else {
-      router.push(`/quiz/${id}/results?score=${score}`);
+      setIsFinished(true);
     }
   };
 
@@ -145,17 +181,13 @@ export default function Detail() {
         );
       case 'video':
         return (
-          <video 
-            className="max-h-60 w-full mx-auto"
-            controls
+          <CustomVideoPlayer 
             src={currentQuestion.media_url}
           />
         );
       case 'audio':
         return (
-          <audio 
-            className="w-full"
-            controls
+          <CustomAudioPlayer 
             src={currentQuestion.media_url}
           />
         );
@@ -176,6 +208,103 @@ export default function Detail() {
     return <div className="text-white w-full h-screen bg-black flex items-center justify-center">Quiz not found</div>;
   }
 
+  if (isFinished) {
+    return (
+
+      <div className="text-white w-full h-full min-h-screen bg-black relative">
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <Image 
+            src="/telek.png" 
+            alt="Decorative overlay"
+            fill
+            priority
+            quality={100}
+            className="object-cover opacity-35"
+          />
+        </div>
+        <header className="flex py-5 items-center text-white justify-between mx-4">
+          <div className="flex justify-between items-center">
+            <svg width="12" height="21" viewBox="0 0 12 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 0.5V1.5H8V3.5H6V5.5H4V7.5H2V8.5H1V9.5H0V11.5H1V12.5H2V13.5H4V15.5H6V17.5H7H8V18.5V19.5H10V20.5H12V17.5H10V15.5H8V13.5H6V11.5H4V9.5H6V7.5H8V5.5H10V3.5H12V0.5H10Z" fill="white"/>
+            </svg>
+            <p onClick={handleBack} className="uppercase text-md ml-2">на главную</p>
+          </div>
+          <div className="flex">
+            <p className="mr-2">{user?.total_score || 0}</p>
+            <Coin />
+          </div>
+        </header>
+        <main className={`flex flex-col mx-4`}>
+          <section>
+            <div className="relative border-2 border-white w-full bg-[#C0C0C0]">
+              <div className="flex items-center border-b border-black mt-2 mx-2">
+              <div className="w-full h-6 flex items-center text-black mb-2">
+                <p className="uppercase px-2 text-xl py-1">
+                  {currentQuestionIndex + 1}/{questions.length}
+                </p>
+              </div>
+              <div
+                style={{
+                  borderTop: '3px solid #293133',
+                  borderLeft: '3px solid #293133',
+                  borderRight: '3px solid white',
+                  borderBottom: '3px solid white'
+                }} 
+                className="w-full h-7 flex items-center mb-2"
+              >
+                {Array.from({ length: 12 }).map((_, index) => {
+                  const filledSteps = Math.round(((currentQuestionIndex + 1) / questions.length) * 12);
+                  return (
+                    <span
+                      key={index}
+                      className={`bg-[#010089] h-6 w-4 " ${
+                        index < filledSteps ? 'bg-[#010089] border-b border-[#4D77FF] border-1   border-r' : 'bg-transparent'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+              <div className="px-2 py-2 flex flex-col items-center">
+                <div className="items-center flex justify-between">
+                  <h3 className="uppercase text-2xl my-2 text-[#25CE16] break-words">ПОЗДРАВЛЯЕМ!</h3> 
+                </div>
+                <div className="py-1">
+                  <h2 className="text-black text-md mb-1">Вы прошли квиз</h2>
+                </div>
+                <div className="items-center flex justify-between py-2">
+                  <h3 className="uppercase text-2xl mt-1 font-medium text-black break-words">{quiz.title}</h3> 
+                </div>
+                <div className="py-2">
+                  <h2 className="text-black text-md">Награда:</h2>
+                </div>
+
+
+                <div className="py-4 flex items-center">
+                  <h2 className="text-black text-lg mr-1">{score}</h2>
+                  <Coin />
+                </div>
+                
+                
+                <button 
+                  className="bg-[#0100BE] text-lg px-4 py-3 w-full mb-1 text-white"
+                >
+                  <a href="/">НА ГЛАВНУЮ</a>
+                </button>
+                <button 
+                  className="bg-[#AAAAAA] text-lg px-4 py-3 w-full mt-2 text-white"
+                  onClick={handleStart}
+                >
+                  ПРОЙТИ ЕЩЕ РАЗ
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="text-white w-full h-full min-h-screen bg-black relative">
       <div className="absolute inset-0 z-10 pointer-events-none">
@@ -194,7 +323,7 @@ export default function Detail() {
           <svg width="12" height="21" viewBox="0 0 12 21" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 0.5V1.5H8V3.5H6V5.5H4V7.5H2V8.5H1V9.5H0V11.5H1V12.5H2V13.5H4V15.5H6V17.5H7H8V18.5V19.5H10V20.5H12V17.5H10V15.5H8V13.5H6V11.5H4V9.5H6V7.5H8V5.5H10V3.5H12V0.5H10Z" fill="white"/>
           </svg>
-          <p onClick={handleBack} className="uppercase text-md ml-2">назад</p>
+          <p onClick={handleBack} className="uppercase text-md ml-2">на главную</p>
         </div>
         <div className="flex">
           <p className="mr-2">{user?.total_score || 0}</p>
@@ -204,7 +333,7 @@ export default function Detail() {
 
       <main className={`flex flex-col mx-4 ${isMainVisible ? "" : "hidden"}`}>
         <section>
-          <div className="relative border-2 border-white w-full bg-white">
+          <div className="relative border-2 border-white w-full bg-[#C0C0C0]">
             <div className="w-full h-6 bg-[#010089]">
               <p className="uppercase px-2 text-xs py-1">Музыка</p>
             </div>
@@ -221,13 +350,13 @@ export default function Detail() {
                 <h3 className="uppercase text-xl mt-1 text-black break-words w-64">{quiz.title}</h3>
                 <div className="bg-[#CECECE] max-h-10">
                   <div className="flex items-center py-2 px-2">
-                    <p className="mr-2 text-xs text-black ">{quiz.max_score}</p>
+                    <p className="mr-2 text-lg text-black ">{quiz.max_score}</p>
                     <Coin />
                   </div>
                 </div>    
               </div>
               <div className="py-2">
-                <h2 className="text-black text-xs mb-1">Соавтор</h2>
+                <h2 className="text-black text-lg mb-1">Соавтор</h2>
                 <div className="flex items-center">
                   <Image 
                     className="w-8 h-8 rounded-full object-cover" 
@@ -236,13 +365,13 @@ export default function Detail() {
                     width={32} 
                     height={32} 
                   />
-                  <h2 className="uppercase text-black text-xs ml-2">{quiz.collaborator_name}</h2>
+                  <h2 className="uppercase text-black text-lg ml-2">{quiz.collaborator_name}</h2>
                 </div>
               </div>
-              <p className="text-black text-xs">{quiz.description}</p>
+              <p className="text-black text-lg">{quiz.description}</p>
               
               <button 
-                className="bg-[#0100BE] px-4 py-2 w-full mt-2 text-white"
+                className="bg-[#0100BE] text-lg px-4 py-3 w-full mt-2 text-white"
                 onClick={handleStart}
               >
                 Пройти
@@ -254,20 +383,33 @@ export default function Detail() {
 
       <main className={`flex flex-col mx-4 ${isMainVisible ? "hidden" : ""}`}>
         <section>
-          <div className="relative border-2 border-white w-full bg-white px-2 py-4">
+          <div className="relative border-2 border-white w-full bg-[#C0C0C0] px-2 py-4">
             <div className="flex items-center border-b border-black">
               <div className="w-full h-6 flex items-center text-black mb-2">
                 <p className="uppercase px-2 text-xl py-1">
                   {currentQuestionIndex + 1}/{questions.length}
                 </p>
               </div>
-              <div className="w-full h-8 flex items-center mb-2">
-                {Array.from({ length: currentQuestionIndex + 1 }).map((_, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-[#010089] h-6 w-4 border-b border-[#4D77FF] border-2 border-r"
-                  />
-                ))}
+              <div
+                style={{
+                  borderTop: '3px solid #293133',
+                  borderLeft: '3px solid #293133',
+                  borderRight: '3px solid white',
+                  borderBottom: '3px solid white'
+                }} 
+                className="w-full h-7 flex items-center mb-2"
+              >
+                {Array.from({ length: 12 }).map((_, index) => {
+                  const filledSteps = Math.round(((currentQuestionIndex + 1) / questions.length) * 12);
+                  return (
+                    <span
+                      key={index}
+                      className={`bg-[#010089] h-6 w-4 " ${
+                        index < filledSteps ? 'bg-[#010089] border-b border-[#4D77FF] border-1   border-r' : 'bg-transparent'
+                      }`}
+                    />
+                  );
+                })}
               </div>
             </div>
             
@@ -278,31 +420,63 @@ export default function Detail() {
               
               {renderMediaContent()}
               
-              <div className="mt-4 space-y-2">
-                {currentQuestion?.answers.map(answer => (
-                  <button 
-                    key={answer.id}
-                    onClick={() => !selectedAnswer && handleAnswerSelect(answer.id, answer.is_correct)}
-                    className={`
-                      w-full py-3 px-4 text-left
-                      ${selectedAnswer === answer.id 
-                        ? answer.is_correct 
-                          ? 'bg-green-100 border-2 border-green-500' 
-                          : 'bg-red-100 border-2 border-red-500'
-                        : 'bg-gray-200 hover:bg-gray-300'
-                      }
-                      text-black rounded-lg transition-colors
-                    `}
-                  >
-                    {answer.text}
-                  </button>
-                ))}
-              </div>
+              <div className="mt-6 space-y-2">
+                {currentQuestion?.answers.map(answer => {
+                  const isSelected = selectedAnswer === answer.id;
+                  const isSubmitted = answerSubmitted;
 
-              {selectedAnswer && (
+                  let bgColor = 'bg-gray-200 hover:bg-gray-300';
+                  let textColor = 'text-black';
+                  let border = '';
+
+                  if (isSubmitted && isSelected) {
+                    if (answer.is_correct) {
+                      bgColor = 'bg-[#25CE16]';
+                      border = 'border-2 border-[#25CE16]';
+                    } else {
+                      bgColor = 'bg-[#E2302A]';
+                      border = 'border-2 border-red-500';
+                    }
+                  } else if (isSelected) {
+                    bgColor = 'bg-blue-200';
+                    textColor = 'text-blue-900';
+                  }
+
+                  return (
+                    <button
+                      key={answer.id}
+                      onClick={() => !answerSubmitted && setSelectedAnswer(answer.id)}
+                      style={{
+                        borderTop: '3.5px solid white',
+                        borderLeft: '3.5px solid white',
+                        borderRight: '3.5px solid #293133',
+                        borderBottom: '3.5px solid #293133',
+                      }}
+                      className={`w-full py-3 px-4 text-lg flex justify-center ${bgColor} ${border} ${textColor} transition-colors`}
+                    >
+                      {answer.text}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {answerSubmitted && selectedAnswer !== null && !isCorrect && (
+                <div className="mt-4 text-lg text-black rounded flex justify-center">
+                  <h1>{currentQuestion.explanation}</h1>
+                </div>
+              )}
+              {!answerSubmitted ? (
+                <button
+                  onClick={handleSubmitAnswer}
+                  disabled={selectedAnswer === null}
+                  className={`w-full py-3.5 text-lg my-2 font-medium mt-6 transition-colors ${selectedAnswer !== null ? 'bg-[#0100BE] text-white hover:bg-blue-900' : 'bg-gray-400 text-white cursor-not-allowed'}`}
+                >
+                  Ответить
+                </button>
+              ) : (
                 <button
                   onClick={goToNextQuestion}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white mt-4"
+                  className="w-full py-3.5 bg-[#0100BE] hover:bg-blue-900 text-lg my-2 font-medium text-white mt-6"
                 >
                   {currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить квиз'}
                 </button>
