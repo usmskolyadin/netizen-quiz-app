@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Head from "next/head";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Netizen TMA",
@@ -13,6 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Script src="https://telegram.org/js/telegram-web-app.js?57" />
       <body
         className={``}
       >

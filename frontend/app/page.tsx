@@ -23,7 +23,17 @@ interface Quiz {
   score_ratings: any[];
 }
 
+interface User {
+  id: number,
+  first_name: string,
+  last_name?: string,
+  username?: string,
+  language_code: string,
+  is_premium?: boolean
+}
+
 export default function Home() {
+  const [userData, setUserData] = useState<User | null>(null)
   const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
   const [quizes, setQuizes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +129,7 @@ export default function Home() {
                       borderRight: '4px solid #293133',
                       borderBottom: '4px solid #293133'
                     }}
+
                   className="relative w-full h-54">
                   <div className="w-full h-6 bg-[#010089]">
                     <p className="uppercase px-2 text-xs py-1">

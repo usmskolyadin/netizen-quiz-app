@@ -112,15 +112,14 @@ export default function QuizSlider({ quizes }: { quizes: Quiz[] }) {
                   style={{
                     borderTop: '6px solid white',
                     borderLeft: '6px solid white',
-                    borderRight: '6px solid #293133', // Коричневый цвет
-                    borderBottom: '6px solid #293133' // Коричневый цвет
+                    borderRight: '6px solid #293133',
+                    borderBottom: '6px solid #293133'
                   }}
                 >
                     <div className="w-full h-6 px-2 bg-[#010089] flex justify-between items-center">
                     <p className="uppercase text-md">Музыка</p>
-                    <svg width="45" height="14" viewBox="0 0 45 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* Ваш SVG код */}
-                    </svg>
+                      <svg width="45" height="14" viewBox="0 0 45 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      </svg>
                     </div>
                     <div className="relative w-full h-86">
                     <Image 
