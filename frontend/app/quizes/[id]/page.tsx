@@ -20,6 +20,8 @@ type QuizBasic = {
   collaborator_name?: string;
   collaborator_logo?: string;
   collaborator_link?: string;
+  categories: { name: string; id: number; quiz_id: number }[];
+
 }
 
 type Question = {
@@ -53,11 +55,20 @@ export default function Detail() {
   const [user, setUser] = useState<{id: number, total_score: number} | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [answerSubmitted, setAnswerSubmitted] = useState(false);
+  const [userResults, setUserResults] = useState<{ quiz_id: number; score: number }[]>([]);
+  const [totalQuestions, setTotalQuestions] = useState<number>(0);
 
   const handleSubmitAnswer = () => {
+    if (selectedAnswer === null || currentQuestion === undefined) return;
+
     setAnswerSubmitted(true);
-    if (isCorrect) {
+
+    const selected = currentQuestion.answers.find(a => a.id === selectedAnswer);
+    if (selected?.is_correct) {
+      setIsCorrect(true);
       setScore(prev => prev + currentQuestion.points);
+    } else {
+      setIsCorrect(false);
     }
   };
   
@@ -87,15 +98,36 @@ export default function Detail() {
   }, []);
 
   useEffect(() => {
+    const fetchUserResults = async () => {
+      if (!user?.id) return;
+
+      try {
+        const res = await axios.get(`/api/results?user_id=${user.id}`);
+        setUserResults(res.data);
+      } catch (err) {
+        console.error("Ошибка при получении результатов:", err);
+      }
+    };
+
+    fetchUserResults();
+  }, [user?.id]);
+
+  useEffect(() => {
     if (isFinished && user && quiz) {
       const sendResult = async () => {
         try {
-          await axios.post('https://netizenworld.ru/tma/tma/results/', {
-            quiz: quiz.id,
-            user: user.id,
+          await axios.post(`https://netizenworld.ru/tma/quizes/${quiz.id}/results`, {
+            user_id: user.id,
             score,
           });
-          console.log('Результат успешно отправлен');
+
+          const updatedUser = await axios.get(`/api/register?tg_id=${user.id}`);
+          setUser({
+            id: updatedUser.data.id,
+            total_score: updatedUser.data.total_score,
+          });
+
+          console.log('Результат успешно отправлен и total_score обновлён');
         } catch (err) {
           console.error('Ошибка при отправке результата:', err);
         }
@@ -132,6 +164,27 @@ export default function Detail() {
       setIsFinished(false);
       setSelectedAnswer(null);
       setIsCorrect(null);
+      setTotalQuestions(response.data.length);
+      setAnswerSubmitted(false);
+    } catch (err) {
+      setError('Failed to load questions');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestart = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`https://netizenworld.ru/tma/tma/quizes/${id}/questions`);
+      setQuestions(response.data);
+      setMainVisible(true);
+      setIsFinished(false);
+      setTotalQuestions(response.data.length);
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      setCurrentQuestionIndex(0);
     } catch (err) {
       setError('Failed to load questions');
       console.error(err);
@@ -145,9 +198,6 @@ export default function Detail() {
   const handleAnswerSelect = (answerId: number, isCorrect: boolean) => {
     setSelectedAnswer(answerId);
     setIsCorrect(isCorrect);
-    if (isCorrect) {
-      setScore(prev => prev + currentQuestion.points);
-    }
   };
 
   const goToNextQuestion = () => {
@@ -291,11 +341,12 @@ export default function Detail() {
                 >
                   <a href="/">НА ГЛАВНУЮ</a>
                 </button>
+
                 <button 
+                onClick={handleRestart}
                   className="bg-[#AAAAAA] text-lg px-4 py-3 w-full mt-2 text-white"
-                  onClick={handleStart}
                 >
-                  ПРОЙТИ ЕЩЕ РАЗ
+                    ПРОЙТИ ЕЩЕ РАЗ
                 </button>
               </div>
             </div>
@@ -334,11 +385,48 @@ export default function Detail() {
       <main className={`flex flex-col mx-4 ${isMainVisible ? "" : "hidden"}`}>
         <section>
           <div className="relative border-2 border-white w-full bg-[#C0C0C0]">
-            <div className="w-full h-6 bg-[#010089]">
-              <p className="uppercase px-2 text-xs py-1">Музыка</p>
+            <div className="w-full h-6 py-4 bg-[#010089] items-center flex justify-between">
+              <p className="uppercase px-2 text-md py-1">{quiz.categories.map(cat => cat.name).join(', ')}</p>
+              <svg className="mx-2" width="55" height="20" viewBox="0 0 45 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M45 14V0L31.2091 0V14H45Z" fill="#C0C0C0"/>
+                        <path d="M44.2344 0.773686V13.1895L44.9965 14V0L44.2344 0.773686Z" fill="#2A2927"/>
+                        <path d="M44.2344 0.770765V13.1866L44.6336 13.5918V0.402344L44.2344 0.770765Z" fill="#4C4C4C"/>
+                        <path d="M44.2358 0.773686L44.9979 0H31.207L32.0054 0.773686H44.2358Z" fill="#E6E6E6"/>
+                        <path d="M44.239 0.770765L44.6382 0.402344H31.6094L32.0086 0.770765H44.239Z" fill="#F2F2F2"/>
+                        <path d="M32.0054 13.1895V0.773686L31.207 0V14L32.0054 13.1895Z" fill="#E6E6E6"/>
+                        <path d="M32.0086 13.1866V0.770765L31.6094 0.402344V13.5918L32.0086 13.1866Z" fill="#F2F2F2"/>
+                        <path d="M32.0054 13.1836L31.207 13.9941H44.9979L44.2358 13.1836H32.0054Z" fill="#2A2927"/>
+                        <path d="M32.0086 13.1836L31.6094 13.5889H44.6382L44.239 13.1836H32.0086Z" fill="#4C4C4C"/>
+                        <path d="M44.2343 0.773438H32.0039V13.1892H44.2343V0.773438Z" fill="#C0C0C0"/>
+                        <path d="M41.3026 2.97517L34.1172 10.2695L34.8871 11.0511L42.0725 3.75671L41.3026 2.97517Z" fill="#1D1D1B"/>
+                        <path d="M34.8871 2.98018L34.1172 3.76172L41.3026 11.0561L42.0725 10.2745L34.8871 2.98018Z" fill="#1D1D1B"/>
+                        <path d="M29.3945 14V0L15.6036 0V14H29.3945Z" fill="#C0C0C0"/>
+                        <path d="M28.6328 0.773686V13.1895L29.3949 14V0L28.6328 0.773686Z" fill="#2A2927"/>
+                        <path d="M28.6328 0.770765V13.1866L29.032 13.5918V0.402344L28.6328 0.770765Z" fill="#4C4C4C"/>
+                        <path d="M28.6304 0.773686L29.3925 0H15.6016L16.4 0.773686H28.6304Z" fill="#E6E6E6"/>
+                        <path d="M28.6374 0.770765L29.0366 0.402344H16.0078L16.407 0.770765H28.6374Z" fill="#F2F2F2"/>
+                        <path d="M16.4 13.1895V0.773686L15.6016 0V14L16.4 13.1895Z" fill="#E6E6E6"/>
+                        <path d="M16.407 13.1866V0.770765L16.0078 0.402344V13.5918L16.407 13.1866Z" fill="#F2F2F2"/>
+                        <path d="M16.4 13.1836L15.6016 13.9941H29.3925L28.6304 13.1836H16.4Z" fill="#2A2927"/>
+                        <path d="M16.407 13.1836L16.0078 13.5889H29.0366L28.6374 13.1836H16.407Z" fill="#4C4C4C"/>
+                        <path d="M28.6327 0.773438H16.4023V13.1892H28.6327V0.773438Z" fill="#C0C0C0"/>
+                        <path d="M26.6378 11.1969H18.3633V2.79688H26.6378V11.1969ZM19.452 10.0916H25.5491V3.90214H19.452V10.0916Z" fill="#1D1D1B"/>
+                        <path d="M26.096 3.34766H18.9102V4.74765H26.096V3.34766Z" fill="#1D1D1B"/>
+                        <path d="M13.793 14V0L0.00205231 0V14H13.793Z" fill="#C0C0C0"/>
+                        <path d="M13.0273 0.773686V13.1895L13.7895 14V0L13.0273 0.773686Z" fill="#2A2927"/>
+                        <path d="M13.0273 0.770765V13.1866L13.4265 13.5918V0.402344L13.0273 0.770765Z" fill="#4C4C4C"/>
+                        <path d="M13.0288 0.773686L13.7909 0H0L0.798404 0.773686H13.0288Z" fill="#E6E6E6"/>
+                        <path d="M13.028 0.770765L13.4272 0.402344H0.398438L0.797639 0.770765H13.028Z" fill="#F2F2F2"/>
+                        <path d="M0.798404 13.1895V0.773686L0 0V14L0.798404 13.1895Z" fill="#E6E6E6"/>
+                        <path d="M0.797639 13.1866V0.770765L0.398438 0.402344V13.5918L0.797639 13.1866Z" fill="#F2F2F2"/>
+                        <path d="M0.798404 13.1836L0 13.9941H13.7909L13.0288 13.1836H0.798404Z" fill="#2A2927"/>
+                        <path d="M0.797639 13.1836L0.398438 13.5889H13.4272L13.028 13.1836H0.797639Z" fill="#4C4C4C"/>
+                        <path d="M13.0234 0.773438H0.792969V13.1892H13.0234V0.773438Z" fill="#C0C0C0"/>
+                        <path d="M9.51115 9.90625H4.28516V11.3799H9.51115V9.90625Z" fill="#1D1D1B"/>
+                      </svg>
             </div>
             <Image 
-              className="max-h-40 object-cover" 
+              className="max-h-36 object-cover" 
               src={quiz.image_url} 
               alt="Quiz cover" 
               width={1000} 
@@ -355,21 +443,31 @@ export default function Detail() {
                   </div>
                 </div>    
               </div>
-              <div className="py-2">
-                <h2 className="text-black text-lg mb-1">Соавтор</h2>
-                <div className="flex items-center">
-                  <Image 
-                    className="w-8 h-8 rounded-full object-cover" 
-                    src={quiz.collaborator_logo || "/placeholder.png"} 
-                    alt="Collaborator logo" 
-                    width={32} 
-                    height={32} 
-                  />
-                  <h2 className="uppercase text-black text-lg ml-2">{quiz.collaborator_name}</h2>
+              {quiz.collaborator_name !== "string" && (
+                <div className="py-2">
+                  <h2 className="text-black text-lg mb-1">Соавтор</h2>
+                  <div className="flex items-center">
+                    <Image 
+                      className="w-8 h-8 rounded-full object-cover" 
+                      src={quiz.collaborator_logo || "/placeholder.png"} 
+                      alt="Collaborator logo" 
+                      width={32} 
+                      height={32} 
+                    />
+                    <h2 className="uppercase text-black text-lg ml-2">{quiz.collaborator_name}</h2>
+                  </div>
                 </div>
-              </div>
-              <p className="text-black text-lg">{quiz.description}</p>
+              )}
+              <p className="text-gray-800 text-md">{quiz.description}</p>
               
+              <div className="flex justify-center my-4">
+                <svg className="mr-2" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="24" height="24" fill="#25CE16"/>
+                  <path d="M18 6V7.5H16.5V9H15V10.5H13.5V12H12V13.5H10.5V15H9.75V15.75H8.25V15H7.5V13.5H6V12.75H4.5V15H6V16.5H7.5V18H8.25V18.75H9.75V18H10.5V16.5H12V15H13.5V13.5H15V12H16.5V10.5H18V9H19.5V6H18Z" fill="white"/>
+                </svg>
+                <p className="text-black text-lg">ПРОЙДЕНО 0/{questions.length}</p>
+              </div>
+
               <button 
                 className="bg-[#0100BE] text-lg px-4 py-3 w-full mt-2 text-white"
                 onClick={handleStart}
@@ -465,6 +563,7 @@ export default function Detail() {
                   <h1>{currentQuestion.explanation}</h1>
                 </div>
               )}
+              
               {!answerSubmitted ? (
                 <button
                   onClick={handleSubmitAnswer}
@@ -478,7 +577,7 @@ export default function Detail() {
                   onClick={goToNextQuestion}
                   className="w-full py-3.5 bg-[#0100BE] hover:bg-blue-900 text-lg my-2 font-medium text-white mt-6"
                 >
-                  {currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить квиз'}
+                  {currentQuestionIndex < questions.length - 1 ? 'Далее' : 'Завершить квиз'}
                 </button>
               )}
             </div>
