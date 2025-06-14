@@ -28,20 +28,18 @@ const CustomAudioPlayer = ({ src }: { src: string }) => {
 
   return (
     <div className="flex items-center justify-between w-full p-2 rounded-md">
-      <button onClick={toggleMute} className="">
-        {isMuted ? (
-            <svg width="45" height="45" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21.8333 19.1667H23.1667V13.8333H21.8333V12.5H20.5V20.5H21.8333V19.1667Z" fill="white"/>
-                <path d="M15.1667 4.5V5.83333H13.8333V7.16667H12.5V8.5H11.1667V9.83333H9.83333V11.1667H8.5V12.5H7.16667V13.8333H5.83333V15.1667H4.5V17.8333H5.83333V19.1667H7.16667V20.5H8.5V21.8333H9.83333V23.1667H11.1667V24.5H12.5V25.8333H13.8333V27.1667H15.1667V28.5H17.8333V4.5H15.1667ZM15.1667 21.8333H13.8333V20.5H12.5V19.1667H11.1667V17.8333H9.83333V15.1667H11.1667V13.8333H12.5V12.5H13.8333V11.1667H15.1667V21.8333Z" fill="white"/>
-                <path d="M25.8333 9.83333V8.5H20.5V11.1667H23.1667V12.5H24.5V20.5H23.1667V21.8333H20.5V24.5H25.8333V23.1667H27.1667V9.83333H25.8333Z" fill="white"/>
-            </svg>
+
+      <button onClick={togglePlay} className="">
+        {isPlaying ? (
+          <svg width="30" height="30" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.33398 21.666H0.667969V0.332031H7.33398V21.666ZM19.334 21.666H12.668V0.332031H19.334V21.666Z" fill="white" />
+          </svg>
         ) : (
-          <svg width="45" height="45" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 8L8 16M8 8L16 16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          <svg width="30" height="30" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.0013 10.6667V9.33333H16.668V8H14.0013V5.33333H11.3346V2.66667H8.66797V0H0.667969V24H8.66797V22.6667V21.3333H11.3346V18.6667H14.0013V16H16.668V14.6667H18.0013V13.3333H19.3346V10.6667H18.0013ZM11.3346 13.3333V16H8.66797V18.6667H6.0013V21.3333H3.33464V2.66667H6.0013V5.33333H8.66797V8H11.3346V10.6667H14.0013V13.3333H11.3346Z" fill="white"/>
           </svg>
         )}
       </button>
-
       <div className=" mx-4 w-full">
         <svg width="100%" height="60" viewBox="0 0 164 35" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M80.93 3H85.07V5.45455H87.5V30.5455H85.07V33H80.93V30.5455H78.5V5.45455H80.93V3Z" fill="#6CED52"/>
@@ -69,18 +67,14 @@ const CustomAudioPlayer = ({ src }: { src: string }) => {
         </svg>
       </div>
 
-
-      <button onClick={togglePlay} className="">
-        {isPlaying ? (
-          <svg width="30" height="30" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7.33398 21.666H0.667969V0.332031H7.33398V21.666ZM19.334 21.666H12.668V0.332031H19.334V21.666Z" fill="white" />
-          </svg>
-        ) : (
-          <svg width="30" height="30" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.0013 10.6667V9.33333H16.668V8H14.0013V5.33333H11.3346V2.66667H8.66797V0H0.667969V24H8.66797V22.6667V21.3333H11.3346V18.6667H14.0013V16H16.668V14.6667H18.0013V13.3333H19.3346V10.6667H18.0013ZM11.3346 13.3333V16H8.66797V18.6667H6.0013V21.3333H3.33464V2.66667H6.0013V5.33333H8.66797V8H11.3346V10.6667H14.0013V13.3333H11.3346Z" fill="white"/>
-          </svg>
-        )}
+      <button onClick={toggleMute} className="">
+            <svg width="45" height="45" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.8333 19.1667H23.1667V13.8333H21.8333V12.5H20.5V20.5H21.8333V19.1667Z" fill="white"/>
+                <path d="M15.1667 4.5V5.83333H13.8333V7.16667H12.5V8.5H11.1667V9.83333H9.83333V11.1667H8.5V12.5H7.16667V13.8333H5.83333V15.1667H4.5V17.8333H5.83333V19.1667H7.16667V20.5H8.5V21.8333H9.83333V23.1667H11.1667V24.5H12.5V25.8333H13.8333V27.1667H15.1667V28.5H17.8333V4.5H15.1667ZM15.1667 21.8333H13.8333V20.5H12.5V19.1667H11.1667V17.8333H9.83333V15.1667H11.1667V13.8333H12.5V12.5H13.8333V11.1667H15.1667V21.8333Z" fill="white"/>
+                <path d="M25.8333 9.83333V8.5H20.5V11.1667H23.1667V12.5H24.5V20.5H23.1667V21.8333H20.5V24.5H25.8333V23.1667H27.1667V9.83333H25.8333Z" fill="white"/>
+            </svg>
       </button>
+
 
       <audio ref={audioRef} src={src} />
     </div>

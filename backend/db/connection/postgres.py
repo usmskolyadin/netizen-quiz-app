@@ -2,7 +2,6 @@ from sqlalchemy import select, update, insert, delete
 from db.base import async_session
 from db.quizes import *
 from db.users import *
-from pydantic import BaseModel, ConfigDict
 from typing import List
 from db.connection.pydantic import *
 from sqlalchemy.orm import selectinload

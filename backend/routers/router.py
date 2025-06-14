@@ -111,3 +111,14 @@ async def create_result(quiz_id: int, user_id: int, result_data: dict):
         await cn.update_user(user_id, {"total_score": total_score})
     
     return QuizResultRead.model_validate(result)
+
+@router.get("/users/{user_id}/results")
+async def get_user_results(user_id: int):
+    user = await cn.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return [
+        {"quiz_id": result.quiz_id, "score": result.score}
+        for result in user.results
+    ]
